@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cmp"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -44,25 +45,39 @@ type Profile struct {
 
 func check(e error) {
 	if e != nil {
-		panic(e)
-		// log.Fatal(e)
+		log.Fatal(e)
 	}
 }
 
-func getProfile(c *gin.Context) {
-	dat, err := os.ReadFile("./test/data/profiles/151453298")
-	fmt.Printf("Read example profile JSON file: %d bytes\n", len(dat))
-	check(err)
+func getProfileLocal(c *gin.Context) {
+	// load test data
+	id := c.Param("accountId")
+	dat, readErr := os.ReadFile("./test/data/profiles/" + id)
+	if readErr != nil {
+		c.Error(errors.New("couldn't read profile data"))
+	}
+
+	// decode json
+	var profile Profile
 	decoder := json.NewDecoder(bytes.NewReader(dat))
-	fmt.Println("Decoding example profile JSON stream...")
-	for {
-		var profile Profile
-		err := decoder.Decode(&profile)
-		check(err)
-		if err == io.EOF {
-			break
+	if err := decoder.Decode(&profile); err == io.EOF {
+		return
+	} else if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, profile)
+}
+
+func ErrorHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+		if len(c.Errors) > 0 {
+			err := c.Errors.Last().Err
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
 		}
-		c.IndentedJSON(http.StatusOK, profile)
 	}
 }
 
@@ -80,7 +95,8 @@ func main() {
 
 	// gin http server
 	router := gin.Default()
-	router.GET("/profile", getProfile)
+	router.Use(ErrorHandler())
+	router.GET("/profile/:accountId", getProfileLocal)
 	http.ListenAndServe(fmt.Sprintf(":%s", ginPort), router)
 
 }
