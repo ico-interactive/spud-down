@@ -1,0 +1,29 @@
+{
+    "accountId": 79872552,
+    "name": "starchie",
+    "avatarUrl": "https://avatars.steamstatic.com/caf6e330de2fbf775066fcd07fcd3c94dff6db0d_full.jpg",
+    "performanceRankMessage": null,
+    "lastUpdated": "2025-09-19T00:19:32.000+00:00",
+    "calibrationMatches": 469,
+    "twitchUsername": null,
+    "youtubeChannelUrl": null,
+    "region": "EU",
+    "calibrationMatchId": 74394868,
+    "calibrationResetMatchId": null,
+    "fontId": "henny-penny",
+    "glowStyleId": "solid",
+    "glowColorId": "pink-2",
+    "outlineId": "none",
+    "animationId": "neon-flicker",
+    "avatarShapeId": "square",
+    "avatarEffectId": "souls",
+    "avatarEffectColorId": "white",
+    "titleId": "hero-25-otp",
+    "updatedWithinLast1Minutes": false,
+    "localisedLastUpdated": "2025-09-19T00:19:32.000+00:00",
+    "ppScore": 5912,
+    "selectedWidgets": [
+        "percentile-deaths"
+    ],
+    "estimatedRankNumber": 105
+}
