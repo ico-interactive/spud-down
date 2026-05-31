@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -54,7 +55,7 @@ func getProfileLocal(c *gin.Context) {
 	id := c.Param("accountId")
 	dat, readErr := os.ReadFile("./test/data/profiles/" + id)
 	if readErr != nil {
-		c.Error(errors.New("couldn't read profile data"))
+		c.Error(errors.New("could not read profile data"))
 	}
 
 	// decode json
@@ -63,7 +64,7 @@ func getProfileLocal(c *gin.Context) {
 	if err := decoder.Decode(&profile); err == io.EOF {
 		return
 	} else if err != nil {
-		panic(err)
+		c.Error(errors.New("could not parse profile data"))
 	}
 	c.JSON(http.StatusOK, profile)
 }
@@ -92,6 +93,9 @@ func main() {
 	apiURL := env["API_URL"]
 	ginPort := cmp.Or(env["GIN_PORT"], "8080")
 	_, _ = apiKey, apiURL
+
+	// discord bot  TODO: move to another module
+	// discord, err := discordgo.New("Bot " + "authentication token")
 
 	// gin http server
 	router := gin.Default()
