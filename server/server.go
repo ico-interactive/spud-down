@@ -61,10 +61,11 @@ func main() {
 	if err != nil {
 		log.Fatal("error: could not load .env file")
 	}
-	apiKey := env["API_KEY"]
-	apiURL := env["API_URL"]
+	apiKey := env["SL_API_KEY"]
+	apiURL := env["SL_API_URL"]
+	apiMockURL := env["SL_MOCK_API_URL"]
 	ginPort := cmp.Or(env["GIN_PORT"], "8080")
-	_, _ = apiKey, apiURL
+	_, _, _ = apiKey, apiURL, apiMockURL
 
 	// gin http server
 	router := gin.Default()
