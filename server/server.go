@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"cmp"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,11 +11,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
+	. "spud-down/types"
+
+	dl_api "github.com/deadlock-api/openapi-clients/go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	. "spud-down/types"
 )
+
+var dl_client *dl_api.APIClient
 
 func check(e error) {
 	if e != nil {
@@ -54,6 +60,24 @@ func ErrorHandler() gin.HandlerFunc {
 	}
 }
 
+func parseInt32(s string) (int32, error) {
+	val, err := strconv.ParseInt(s, 10, 32)
+	return int32(val), err
+}
+
+func getMatchHistory(c *gin.Context) {
+	accountIdParam := c.Param("accountId")
+	accountId, err := parseInt32(accountIdParam)
+	if err != nil {
+		c.Error(errors.New("could not find account id"))
+	}
+	matches, _, err := dl_client.PlayersAPI.MatchHistory(context.Background(), accountId).ForceRefetch(true).Execute()
+	if err != nil {
+		c.Error(errors.New("could not fetch from deadlock-api"))
+	}
+	c.JSON(http.StatusOK, matches)
+}
+
 func main() {
 
 	// load env
@@ -61,16 +85,23 @@ func main() {
 	if err != nil {
 		log.Fatal("error: could not load .env file")
 	}
-	apiKey := env["SL_API_KEY"]
-	apiURL := env["SL_API_URL"]
-	apiMockURL := env["SL_MOCK_API_URL"]
-	ginPort := cmp.Or(env["GIN_PORT"], "8080")
-	_, _, _ = apiKey, apiURL, apiMockURL
+	sl_key := env["SL_API_KEY"]
+	sl_url := env["SL_API_URL"]
+	sl_mock_url := env["SL_MOCK_API_URL"]
+	dl_api_url := env["DL_API_URL"]
+	gin_port := cmp.Or(env["GIN_PORT"], "8080")
+	_, _, _ = sl_key, sl_url, sl_mock_url
+
+	// deadlock-api
+	dl_cfg := dl_api.NewConfiguration()
+	dl_cfg.Host = dl_api_url
+	dl_client = dl_api.NewAPIClient(dl_cfg)
 
 	// gin http server
 	router := gin.Default()
 	router.Use(ErrorHandler())
 	router.GET("/profile/:accountId", getProfileLocal)
-	http.ListenAndServe(fmt.Sprintf(":%s", ginPort), router)
+	router.GET("/player/history/:accountId", getMatchHistory)
+	http.ListenAndServe(fmt.Sprintf(":%s", gin_port), router)
 
 }
