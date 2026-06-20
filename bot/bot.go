@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	nurl "net/url"
 	"os"
 	"os/signal"
+	"regexp"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -51,6 +54,46 @@ var (
 					Description: "the text to fnafify",
 					Required:    true,
 				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "url",
+					Description: "the image or @user to fnafify with",
+					MinLength:   new(1),
+					MaxLength:   500,
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionAttachment,
+					Name:        "attachment",
+					Description: "the image to fnafify with",
+					Required:    false,
+				},
+			},
+		},
+		{
+			Name:        "fnafify2",
+			Description: "ouuuuUUoOOuOUUHH SCARY?!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "text",
+					Description: "the text to fnafify",
+					Required:    true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "url",
+					Description: "the image or @user to fnafify with",
+					MinLength:   new(1),
+					MaxLength:   500,
+					Required:    false,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionAttachment,
+					Name:        "attachment",
+					Description: "the image to fnafify with",
+					Required:    false,
+				},
 			},
 		},
 	}
@@ -65,19 +108,100 @@ var (
 		},
 		"fnafify": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 			// TODO: refactor to helper function
-			options := interaction.ApplicationCommandData().Options
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-			for _, opt := range options {
+			data := interaction.ApplicationCommandData()
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(data.Options))
+			for _, opt := range data.Options {
+				optionMap[opt.Name] = opt
+			}
+			// end todo block
+			text := ""
+			if optionMap["text"] != nil {
+				text = optionMap["text"].StringValue()
+			}
+
+			url := ""
+			if optionMap["url"] != nil {
+				url = optionMap["url"].StringValue()
+			}
+
+			attachment := optionMap["attachment"]
+
+			content := fmt.Sprintf("https://fnaf.starchie.mom/?text=%s", text)
+			if url != "" {
+				log.Printf("url provided: %s", url)
+				matched, err := regexp.MatchString(`^<@!?(\d+)>$`, url)
+				if err == nil && matched {
+					// sanitize stupid string "<@123456789>" -> "123456789")
+					re := regexp.MustCompile(`\d+`)
+					userID := re.FindString(url)
+
+					// get the user object from the session cache or api
+					user, err := session.User(userID)
+					if err != nil {
+						log.Printf("error: could not get user with id %s: %v", userID, err)
+					} else {
+						// get the user's avatar url only if we successfully got the user
+						avatarURL := user.AvatarURL("512")
+						url = avatarURL
+					}
+				}
+				content += fmt.Sprintf("&url=%s", nurl.QueryEscape(url))
+			} else if attachment != nil {
+				var attachmentURL string
+				for _, attachment := range data.Resolved.Attachments {
+					attachmentURL = nurl.QueryEscape(attachment.URL)
+					break // only get first attachment for now
+				}
+				content += fmt.Sprintf("&url=%s", attachmentURL)
+			}
+			session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: content,
+				},
+			})
+		},
+		"fnafify2": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+			// TODO: refactor to helper function
+			data := interaction.ApplicationCommandData()
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(data.Options))
+			for _, opt := range data.Options {
 				optionMap[opt.Name] = opt
 			}
 			// end todo block
 			text := optionMap["text"].StringValue()
-			session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "https://fnaf.starchie.mom/?text=" + text,
-				},
-			})
+			url := optionMap["url"].StringValue()
+
+			if optionMap["attachment"] == nil {
+				session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf("```\ntext: %s\nurl: %s\n```", text, url),
+					},
+				})
+			} else {
+				// case: attachment is provided
+				if len(data.Resolved.Attachments) > 0 {
+					var attachmentURL string
+					for _, attachment := range data.Resolved.Attachments {
+						attachmentURL = attachment.URL
+						break // only get first attachment for now
+					}
+					session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: fmt.Sprintf("```\ntext: %s\nurl: %s\nattachment: %s\n```", text, url, attachmentURL),
+						},
+					})
+				} else {
+					session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Content: "error: attachment not resolved",
+						},
+					})
+				}
+			}
 		},
 	}
 )
