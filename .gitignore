@@ -21,3 +21,6 @@ go.work.sum
 
 # secrets
 .env
+
+# binaries
+.bot/bot

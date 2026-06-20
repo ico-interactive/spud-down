@@ -41,13 +41,41 @@ var (
 			Name:        "merge",
 			Description: "what follows?",
 		},
+		{
+			Name:        "fnafify",
+			Description: "ouuuuUUoOOuOUUHH SCARY?!",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "text",
+					Description: "the text to fnafify",
+					Required:    true,
+				},
+			},
+		},
 	}
 	commandHandlers = map[string]func(session *discordgo.Session, interaction *discordgo.InteractionCreate){
 		"merge": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 			session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "noob",
+					Content: "https://fnaf.starchie.mom/?text=noob",
+				},
+			})
+		},
+		"fnafify": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+			// TODO: refactor to helper function
+			options := interaction.ApplicationCommandData().Options
+			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+			for _, opt := range options {
+				optionMap[opt.Name] = opt
+			}
+			// end todo block
+			text := optionMap["text"].StringValue()
+			session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "https://fnaf.starchie.mom/?text=" + text,
 				},
 			})
 		},
