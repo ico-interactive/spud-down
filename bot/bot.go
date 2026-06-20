@@ -70,32 +70,6 @@ var (
 				},
 			},
 		},
-		{
-			Name:        "fnafify2",
-			Description: "ouuuuUUoOOuOUUHH SCARY?!",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "text",
-					Description: "the text to fnafify",
-					Required:    true,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "url",
-					Description: "the image or @user to fnafify with",
-					MinLength:   new(1),
-					MaxLength:   500,
-					Required:    false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionAttachment,
-					Name:        "attachment",
-					Description: "the image to fnafify with",
-					Required:    false,
-				},
-			},
-		},
 	}
 	commandHandlers = map[string]func(session *discordgo.Session, interaction *discordgo.InteractionCreate){
 		"merge": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
@@ -160,48 +134,6 @@ var (
 					Content: content,
 				},
 			})
-		},
-		"fnafify2": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
-			// TODO: refactor to helper function
-			data := interaction.ApplicationCommandData()
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(data.Options))
-			for _, opt := range data.Options {
-				optionMap[opt.Name] = opt
-			}
-			// end todo block
-			text := optionMap["text"].StringValue()
-			url := optionMap["url"].StringValue()
-
-			if optionMap["attachment"] == nil {
-				session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Content: fmt.Sprintf("```\ntext: %s\nurl: %s\n```", text, url),
-					},
-				})
-			} else {
-				// case: attachment is provided
-				if len(data.Resolved.Attachments) > 0 {
-					var attachmentURL string
-					for _, attachment := range data.Resolved.Attachments {
-						attachmentURL = attachment.URL
-						break // only get first attachment for now
-					}
-					session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Content: fmt.Sprintf("```\ntext: %s\nurl: %s\nattachment: %s\n```", text, url, attachmentURL),
-						},
-					})
-				} else {
-					session.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseChannelMessageWithSource,
-						Data: &discordgo.InteractionResponseData{
-							Content: "error: attachment not resolved",
-						},
-					})
-				}
-			}
 		},
 	}
 )
