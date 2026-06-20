@@ -68,6 +68,17 @@ var (
 					Description: "the image to fnafify with",
 					Required:    false,
 				},
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "preset",
+					Description: "the image to fnafify with",
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{
+							Name: "not implemented yet",
+						},
+					},
+					Required: false,
+				},
 			},
 		},
 	}
@@ -98,7 +109,14 @@ var (
 				url = optionMap["url"].StringValue()
 			}
 
+			preset := ""
+			if optionMap["preset"] != nil {
+				url = optionMap["preset"].StringValue()
+			}
+
 			attachment := optionMap["attachment"]
+
+			log.Printf("text: %s, url: %s, preset: %s, attachment: %v", text, url, preset, attachment)
 
 			content := fmt.Sprintf("https://fnaf.starchie.mom/?text=%s", nurl.QueryEscape(text))
 			if url != "" {
