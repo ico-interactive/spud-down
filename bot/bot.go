@@ -100,9 +100,8 @@ var (
 
 			attachment := optionMap["attachment"]
 
-			content := fmt.Sprintf("https://fnaf.starchie.mom/?text=%s", text)
+			content := fmt.Sprintf("https://fnaf.starchie.mom/?text=%s", nurl.QueryEscape(text))
 			if url != "" {
-				log.Printf("url provided: %s", url)
 				matched, err := regexp.MatchString(`^<@!?(\d+)>$`, url)
 				if err == nil && matched {
 					// sanitize stupid string "<@123456789>" -> "123456789")
