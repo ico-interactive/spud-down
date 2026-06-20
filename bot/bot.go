@@ -12,7 +12,7 @@ import (
 
 var (
 	fnafAPI        = "localhost:9638"
-	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
+	RemoveCommands = flag.Bool("rmcmd", false, "Remove all commands after shutdowning or not")
 )
 
 var session *discordgo.Session
