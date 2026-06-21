@@ -24,4 +24,4 @@ go.work.sum
 mise.local.toml
 
 # binaries
-.bot/bot
+# bot/bot

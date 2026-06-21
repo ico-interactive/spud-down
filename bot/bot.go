@@ -88,13 +88,8 @@ var (
 			})
 		},
 		"fnafify": func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
-			// TODO: refactor to helper function
 			data := interaction.ApplicationCommandData()
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(data.Options))
-			for _, opt := range data.Options {
-				optionMap[opt.Name] = opt
-			}
-			// end todo block
+			optionMap := buildOptionMap(data.Options)
 			text := ""
 			if optionMap["text"] != nil {
 				text = optionMap["text"].StringValue()
@@ -151,6 +146,14 @@ var (
 	}
 )
 
+func buildOptionMap(options []*discordgo.ApplicationCommandInteractionDataOption) map[string]*discordgo.ApplicationCommandInteractionDataOption {
+	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
+	for _, opt := range options {
+		optionMap[opt.Name] = opt
+	}
+	return optionMap
+}
+
 func init() {
 	session.AddHandler(func(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 		if handler, ok := commandHandlers[interaction.ApplicationCommandData().Name]; ok {
@@ -184,6 +187,7 @@ func main() {
 	log.Println("press ctrl+c to exit")
 	<-stop
 
+	// destruct application commands if started with -rmcmd flag
 	if *RemoveCommands {
 		log.Println("removing commands...")
 		for _, v := range registeredCommands {
