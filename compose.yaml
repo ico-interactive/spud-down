@@ -2,17 +2,21 @@ name: spud-down
 
 services:
   bot:
+    image: spud-down-bot:latest
     environment:
       DISCORD_TOKEN:
     build:
       context: ./bot
       dockerfile: ../Dockerfile
-  server:
+  api:
+    image: spud-down-api:latest
+    profiles:
+      - test
     environment:
       SL_API_KEY:
       SL_API_URL:
       SL_MOCK_API_URL:
       DL_API_URL:
     build:
-      context: ./bot
+      context: ./server
       dockerfile: ../Dockerfile
