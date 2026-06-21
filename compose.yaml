@@ -2,14 +2,14 @@ name: spud-down
 
 services:
   bot:
-    image: spud-down-bot:latest
     environment:
       DISCORD_TOKEN:
     build:
       context: ./bot
       dockerfile: ../Dockerfile
+      tags:
+        - spud-down-bot:latest
   api:
-    image: spud-down-api:latest
     profiles:
       - test
     environment:
@@ -20,3 +20,5 @@ services:
     build:
       context: ./server
       dockerfile: ../Dockerfile
+      tags:
+        - spud-down-bot:latest
