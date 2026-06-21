@@ -1,0 +1,15 @@
+[tools]
+go = "1.26"
+
+[env]
+# discord bot
+DISCORD_TOKEN = ""
+
+# apis
+SL_API_KEY = ""
+SL_API_URL = "https://statlocker.gg/api"
+SL_MOCK_API_URL = "http://localhost:9050/mock_api"
+DL_API_URL = "api.deadlock-api.com"
+
+# server
+GIN_PORT = "9050"

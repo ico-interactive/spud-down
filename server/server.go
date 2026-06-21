@@ -17,7 +17,6 @@ import (
 
 	dl_api "github.com/deadlock-api/openapi-clients/go"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 var dl_client *dl_api.APIClient
@@ -81,15 +80,11 @@ func getMatchHistory(c *gin.Context) {
 func main() {
 
 	// load env
-	env, err := godotenv.Read("../.env")
-	if err != nil {
-		log.Fatal("error: could not load .env file")
-	}
-	sl_key := env["SL_API_KEY"]
-	sl_url := env["SL_API_URL"]
-	sl_mock_url := env["SL_MOCK_API_URL"]
-	dl_api_url := env["DL_API_URL"]
-	gin_port := cmp.Or(env["GIN_PORT"], "8080")
+	sl_key := os.Getenv("SL_API_KEY")
+	sl_url := os.Getenv("SL_API_URL")
+	sl_mock_url := os.Getenv("SL_MOCK_API_URL")
+	dl_api_url := os.Getenv("DL_API_URL")
+	gin_port := cmp.Or(os.Getenv("GIN_PORT"), "8080")
 	_, _, _ = sl_key, sl_url, sl_mock_url
 
 	// deadlock-api

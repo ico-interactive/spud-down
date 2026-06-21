@@ -10,7 +10,6 @@ import (
 	"regexp"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -24,14 +23,10 @@ func init() { flag.Parse() }
 
 func init() {
 	// load env
-	env, err := godotenv.Read("../.env")
-	if err != nil {
-		log.Fatal("error: could not load .env file")
-	}
-
-	token := env["DISCORD_TOKEN"]
+	token := os.Getenv("DISCORD_TOKEN")
 
 	// setup session bot session
+	var err error
 	session, err = discordgo.New("Bot " + token)
 	if err != nil {
 		log.Fatal("error: could not create discord session: ", err)
@@ -74,7 +69,8 @@ var (
 					Description: "the image to fnafify with",
 					Choices: []*discordgo.ApplicationCommandOptionChoice{
 						{
-							Name: "not implemented yet",
+							Name:  "not implemented yet",
+							Value: "not_implemented",
 						},
 					},
 					Required: false,
