@@ -69,8 +69,8 @@ var (
 					Description: "the image to fnafify with",
 					Choices: []*discordgo.ApplicationCommandOptionChoice{
 						{
-							Name:  "not implemented yet",
-							Value: "not_implemented",
+							Name:  "23face",
+							Value: "23face",
 						},
 					},
 					Required: false,
