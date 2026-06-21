@@ -1,4 +1,5 @@
-FROM golang:1.26-alpine
+# build stage
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -9,4 +10,12 @@ RUN go mod download
 COPY . .
 RUN go build -v -o /usr/local/bin/app ./...
 
-CMD ["app"]
+# Runtime stage
+FROM alpine:latest
+
+WORKDIR /app
+
+# Copy only the compiled binary from builder
+COPY --from=builder /usr/local/bin/app /app/app
+
+CMD ["/app/app"]

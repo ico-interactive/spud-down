@@ -21,4 +21,4 @@ services:
       context: ./server
       dockerfile: ../Dockerfile
       tags:
-        - spud-down-bot:latest
+        - spud-down-api:latest
